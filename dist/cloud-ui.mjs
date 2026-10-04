@@ -42,7 +42,7 @@ async function boot(){
       for(const value of [next.displayName,next.email]){const p=document.createElement('p');p.textContent=value||'';el('cloud-account').append(p);}
       if(next.photoURL?.startsWith('https://')){const img=document.createElement('img');img.src=next.photoURL;img.alt='รูปโปรไฟล์';img.width=36;img.height=36;img.referrerPolicy='no-referrer';el('cloud-account').prepend(img);}
       // Login only lists plans; never uploads the shared local draft to another account.
-      action(clients);
+      clients().catch(()=>{if(user?.uid===next.uid)showStatus('error');});
     });
     window.addEventListener('offline',()=>showStatus('offline'));
     window.addEventListener('online',()=>{if(user)action(async()=>{await clients();await engine.reconcile();});});
