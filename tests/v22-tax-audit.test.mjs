@@ -1,0 +1,31 @@
+import assert from 'node:assert/strict';
+import {fresh,factories,taxResult,specialDeductions,decodePlan,VERSION} from '../dist/model.mjs';
+const s=fresh();s.tax.seniorExempt=190000;s.tax.seniorType='3';
+s.incomes=[{...factories.incomes(),taxType:'3',subtype:'rights',gross:200000}];
+assert.equal(taxResult(s).costs,5000); // formerly incorrectly left the full 100,000 expense allowance
+s.incomes.unshift({...factories.incomes(),taxType:'3',subtype:'annuity',gross:150000});
+assert.equal(taxResult(s).costs,80000); // exemption allocated once across the selected category
+s.incomes=[{...factories.incomes(),taxType:'3',subtype:'rights',gross:150000},{...factories.incomes(),taxType:'3',subtype:'rights',gross:200000,method:'actual',costs:170000}];
+assert.equal(taxResult(s).costs,160000);
+const d=fresh();d.incomes=[{...factories.incomes(),gross:1000000}];
+d.tax.donation=100000;d.tax.doubleDonation=100000;
+assert.equal(taxResult(d).donation,0);assert.equal(taxResult(d).doubleDonation,0);
+d.tax.donationConfirmed=true;d.tax.doubleDonationConfirmed=true;
+assert.equal(taxResult(d).doubleDonation,84000);assert.equal(taxResult(d).donation,75600);
+Object.assign(d.tax,{solar:300000,solarConnected:'2026-08-01',art:150000,homeBuild:120000,homeContract:'2025-01-01',homeStarted:'2025-02-01',homeCompleted:'2026-09-01'});
+assert.deepEqual(specialDeductions(d),{solar:0,art:0,home:0});
+Object.assign(d.tax,{solarConfirmed:true,artConfirmed:true,homeConfirmed:true});
+assert.deepEqual(specialDeductions(d),{solar:200000,art:100000,home:100000});
+d.tax.solarConnected='2027-01-01';d.tax.homeContract='2026-01-01';
+assert.deepEqual(specialDeductions(d),{solar:0,art:100000,home:0});
+d.tax.solarConnected='2026-03-02';assert.equal(specialDeductions(d).solar,0);
+d.tax.solarConnected='2026-03-03';assert.equal(specialDeductions(d).solar,200000);
+const m=fresh();m.incomes=[{...factories.incomes(),gross:1000000,taxType:'8',method:'actual',costs:1000000}];
+assert.equal(taxResult(m).tax2,0);m.incomes[0].gross=1000001;assert.equal(taxResult(m).tax2,5000.005);
+const old=fresh();old.version=4;old.tax.donation=10000;
+for(const k of ['donationConfirmed','doubleDonationConfirmed','solar','solarConnected','solarConfirmed','art','artConfirmed','homeContract','homeStarted','homeCompleted','homeConfirmed'])delete old.tax[k];
+const migrated=decodePlan({app:'FP',version:4,data:old});
+assert.equal(migrated.tax.donation,10000);assert.equal(migrated.tax.donationConfirmed,false);
+assert.deepEqual(decodePlan(JSON.parse(JSON.stringify({app:'FP',version:VERSION,data:d}))),d);
+assert.throws(()=>decodePlan({app:'FP',version:VERSION,data:{...fresh(),tax:{...fresh().tax,year:2568}}}));
+console.log('PASS V2.2: senior rights expenses, mixed-category exemption once, donation eligibility/order/caps, solar dates/cap, art/home conditions, minimum-tax boundary, migration');

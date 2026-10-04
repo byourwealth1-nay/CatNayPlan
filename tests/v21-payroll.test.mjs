@@ -1,0 +1,43 @@
+import assert from 'node:assert/strict';
+import {fresh,factories,cashflow,incomeBreakdown,retirementResult,taxResult,socialAnnual,portfolioTax,decodePlan,VERSION,warnings} from '../dist/model.mjs';
+const s=fresh();
+const salary={...factories.incomes(),amount:50000,amountMode:'gross',gross:600000,socialDeduct:875,taxDeduct:2000,otherDeduct:500};
+s.incomes.push(salary);
+s.portfolios.push({...factories.portfolios(),type:'PVD',value:300000,monthly:2500,employer:2500,payroll:true,incomeId:salary.id,purpose:'retirement',taxAuto:true});
+assert.equal(incomeBreakdown(s,salary).net,44125);
+assert.equal(cashflow(s).remaining,44125);
+assert.equal(cashflow(s).months[0].income,44125);
+assert.equal(cashflow(s).net,300000);
+assert.equal(retirementResult(s).capital,300000);
+assert.equal(retirementResult(s).monthly,5000);
+assert.equal(portfolioTax(s.portfolios[0]),30000);
+assert.equal(taxResult(s).retirement,30000); // employer contributions excluded
+assert.equal(socialAnnual(s),10500);
+assert.equal(taxResult(s).parts.find(([name])=>name.includes('ประกันสังคม'))[1],10500);
+salary.amountMode='net';salary.amount=44125;
+assert.equal(cashflow(s).remaining,44125); // no second payroll deduction
+assert.equal(cashflow(s).payrollDeductions,0);
+s.retirement.socialOwnMonthly=432;
+assert.equal(cashflow(s).remaining,43693);
+assert.equal(cashflow(s).months[0].expense,432);
+assert.equal(socialAnnual(s),15684);
+s.tax.socialAuto=false;s.tax.socialPaid=4000;
+s.portfolios[0].taxAuto=false;s.portfolios[0].taxPaid=15000;
+assert.equal(socialAnnual(s),4000);
+assert.equal(taxResult(s).retirement,15000);
+assert.equal(cashflow(s).remaining,43693); // actual tax override doesn't change budget
+const second={...factories.incomes(),amount:10000,amountMode:'gross'};
+s.incomes.push(second);assert.equal(incomeBreakdown(s,second).net,10000);
+s.incomes.push({...factories.incomes(),amount:12000,amountMode:'gross',frequency:'yearly',month:3,socialDeduct:100,taxDeduct:1000});
+assert.equal(cashflow(s).months[2].income-cashflow(s).months[1].income,10900);
+s.incomes.shift();assert.ok(warnings(s).some(x=>x.includes('ยังไม่ผูก')));
+const legacy=fresh();legacy.version=3;legacy.incomes=[{...factories.incomes(),amount:40000}];legacy.portfolios=[{...factories.portfolios(),type:'PVD',monthly:2000,taxPaid:19000,payroll:true,value:100000}];legacy.tax.socialPaid=8000;
+for(const r of legacy.incomes)for(const k of ['amountMode','socialDeduct','taxDeduct','otherDeduct'])delete r[k];
+for(const r of legacy.portfolios)for(const k of ['incomeId','taxAuto'])delete r[k];
+delete legacy.tax.socialAuto;delete legacy.retirement.socialOwnMonthly;
+const migrated=decodePlan({app:'FP',version:3,data:legacy});
+assert.equal(cashflow(migrated).remaining,40000);
+assert.equal(migrated.portfolios.length,1);assert.equal(portfolioTax(migrated.portfolios[0]),19000);
+assert.equal(socialAnnual(migrated),8000);assert.equal(migrated.tax.socialAuto,false);
+assert.deepEqual(decodePlan(JSON.parse(JSON.stringify({app:'FP',version:VERSION,data:s}))),s);
+console.log('PASS V2.1: gross/net equivalence, linked PVD once, employer exclusion, social self-pay, actual tax override, multiple incomes, annual timing, V2 migration');
