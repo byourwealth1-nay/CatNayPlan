@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function owner(uid) { return request.auth != null && request.auth.uid == uid; }
+    function title(value) { return value is string && value.size() > 0 && value.size() <= 160; }
+    function clock() { return request.resource.data.updatedAt == request.time; }
+    match /users/{uid} {
+      allow read: if owner(uid);
+      allow write: if false;
+      match /clients/{clientId} {
+        allow read: if owner(uid);
+        function validClient() {
+          return request.resource.data.keys().hasOnly(['name','archived','createdAt','updatedAt'])
+            && title(request.resource.data.name) && request.resource.data.archived is bool && clock();
+        }
+        allow create: if owner(uid) && validClient() && request.resource.data.createdAt == request.time;
+        allow update: if owner(uid) && validClient() && request.resource.data.createdAt == resource.data.createdAt;
+        allow delete: if false;
+        match /plans/{planId} {
+          allow read: if owner(uid);
+          function validPlan() {
+            let p = request.resource.data;
+            return p.keys().hasOnly(['planName','data','schemaVersion','revision','createdAt','updatedAt'])
+              && title(p.planName) && p.schemaVersion == 6 && p.revision is int
+              && p.data is map && p.data.version == 6 && p.data.profile is map
+              && p.data.tax is map && p.data.tax.year == 2569 && p.data.ux is map
+              && p.data.incomes is list && p.data.expenses is list && p.data.assets is list
+              && p.data.debts is list && p.data.policies is list && p.data.portfolios is list && p.data.goals is list
+              && (p.data.profile.name.size() > 0 || p.data.incomes.size() > 0 || p.data.expenses.size() > 0 || p.data.assets.size() > 0 || p.data.debts.size() > 0 || p.data.policies.size() > 0 || p.data.portfolios.size() > 0 || p.data.goals.size() > 0 || p.data.review.notes.size() > 0)
+              && clock()
+              && get(/databases/$(database)/documents/users/$(uid)/clients/$(clientId)).data.archived == false;
+          }
+          allow create: if owner(uid) && validPlan() && request.resource.data.revision == 1 && request.resource.data.createdAt == request.time;
+          allow update: if owner(uid) && validPlan() && request.resource.data.revision == resource.data.revision + 1 && request.resource.data.createdAt == resource.data.createdAt;
+          allow delete: if false;
+        }
+      }
+    }
+  }
+}
