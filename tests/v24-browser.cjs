@@ -18,7 +18,7 @@ const assert=require('node:assert/strict');
  async getClients(){return [{id:'client',name:'Test client',archived:false}];},async getPlans(){return cloud?[{id:'plan',planName:'Test plan'}]:[];},
  async createPlan(cid,title,data){cloud={data:structuredClone(data),planName:title,revision:1,updatedAt:100,createdAt:100};return 'plan';},
  async loadPlan(){return structuredClone(cloud);},async savePlan(cid,pid,r){if(r.revision!==cloud.revision)throw Object.assign(Error('conflict'),{code:'conflict'});cloud={...r,revision:r.revision+1,updatedAt:cloud.updatedAt+10};window.__cloudWrites++;return cloud.revision;}
- };}`})));
+ };}`}));
  await signedPage.goto('http://localhost:8000');await signedPage.locator('[data-bind="profile.name"]').fill('Local migration');await signedPage.locator('.settings > summary').click();await signedPage.locator('#cloud-login').click();
  await signedPage.locator('#cloud-clients option[value="client"]').waitFor({state:'attached'});await signedPage.locator('#cloud-clients').selectOption('client');
  assert.equal(await signedPage.evaluate(()=>window.__cloudWrites),0);
@@ -28,4 +28,4 @@ const assert=require('node:assert/strict');
  await signed.setOffline(true);await signedPage.locator('[data-bind="profile.name"]').fill('Offline cloud edit');await signed.setOffline(false);await signedPage.waitForFunction(()=>window.__cloudWrites===2);
  await signedPage.locator('.settings > summary').click();await signedPage.locator('#cloud-logout').click();await signedPage.locator('#cloud-login').waitFor();await signedPage.locator('.settings > summary').click();await signedPage.locator('[data-bind="profile.name"]').fill('Logged out edit');assert.equal(await signedPage.locator('#save-status').textContent(),'บันทึกแล้ว');
  console.log('PASS V2.4 browser: fallback, backup restore, offline save, settings layouts; fake-service login, consent migration, sync, reconnect and logout');
-}finally{await browser.close();}})().catch(()=>{console.error('FAIL V2.4 browser checks');process.exit(1);});
+}finally{await browser.close();}})().catch(error=>{console.error('FAIL V2.4 browser checks',error.stack);process.exit(1);});

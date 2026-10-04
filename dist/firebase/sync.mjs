@@ -5,7 +5,7 @@ export function validatePlan(data) {
   if(!result.ux)throw Error('invalid-plan');normalizeMeta(result);return result;
 }
 export function meaningful(data) {
-  return !!data?.profile?.name?.trim() || ['incomes','expenses','assets','debts','policies','portfolios','goals'].some(k=>data?.[k]?.length) || !!data?.review?.notes?.trim();
+  return (!!data?.profile?.name?.trim() && data.profile.name.trim()!=='แผนการเงินใหม่') || ['incomes','expenses','assets','debts','policies','portfolios','goals'].some(k=>data?.[k]?.length) || !!data?.review?.notes?.trim();
 }
 export const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 export const localKey=(uid,cid,pid)=>'catnay.v24.'+[uid,cid,pid].map(encodeURIComponent).join('.');

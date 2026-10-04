@@ -26,7 +26,7 @@ service cloud.firestore {
               && p.data.tax is map && p.data.tax.year == 2569 && p.data.ux is map
               && p.data.incomes is list && p.data.expenses is list && p.data.assets is list
               && p.data.debts is list && p.data.policies is list && p.data.portfolios is list && p.data.goals is list
-              && (p.data.profile.name.size() > 0 || p.data.incomes.size() > 0 || p.data.expenses.size() > 0 || p.data.assets.size() > 0 || p.data.debts.size() > 0 || p.data.policies.size() > 0 || p.data.portfolios.size() > 0 || p.data.goals.size() > 0 || p.data.review.notes.size() > 0)
+              && ((p.data.profile.name.size() > 0 && p.data.profile.name != 'แผนการเงินใหม่') || p.data.incomes.size() > 0 || p.data.expenses.size() > 0 || p.data.assets.size() > 0 || p.data.debts.size() > 0 || p.data.policies.size() > 0 || p.data.portfolios.size() > 0 || p.data.goals.size() > 0 || p.data.review.notes.size() > 0)
               && clock()
               && get(/databases/$(database)/documents/users/$(uid)/clients/$(clientId)).data.archived == false;
           }
