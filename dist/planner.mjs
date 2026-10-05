@@ -1,5 +1,5 @@
-import {cashflow, retirementResult, goalResults, debtSchedule, incomeBreakdown, incomeMonths, sum, uid} from './model.mjs?v=2.6';
-import {missing, unknownFor} from './experience.mjs?v=2.6';
+import {cashflow, retirementResult, goalResults, debtSchedule, incomeBreakdown, incomeMonths, sum, uid} from './model.mjs?v=2.6-flow1';
+import {missing, unknownFor} from './experience.mjs?v=2.6-flow1';
 
 export function planning(s) {
   return s.review.planner ||= {focus:['finance'],reason:'',tasks:[],history:[]};
@@ -8,6 +8,7 @@ export function validatePlanning(s) {
   if (!s.review?.planner) return s;
   const p=s.review.planner;
   if (!p || !Array.isArray(p.focus) || p.focus.length>8 || p.focus.some(x=>!['finance','debt','reserve','retirement','tax','protection','goals'].includes(x)) || typeof p.reason!=='string' || p.reason.length>2000 || !Array.isArray(p.tasks) || p.tasks.length>100 || !Array.isArray(p.history) || p.history.length>120) throw Error('ข้อมูลแผนลงมือทำไม่ถูกต้อง');
+  if(p.deferred!==undefined&&(!Array.isArray(p.deferred)||p.deferred.length>4||p.deferred.some(x=>!['about','income','expense','assets'].includes(x))))throw Error('ข้อมูลขั้นตอนที่พักไว้ไม่ถูกต้อง');
   const text=(x,max=2000)=>typeof x==='string'&&x.length<=max;
   const date=x=>x===''||/^\d{4}-\d{2}-\d{2}$/.test(x)&&Number.isFinite(Date.parse(x));
   for(const t of p.tasks) if(!text(t.id,160)||!text(t.title)||!text(t.owner,160)||!date(t.date)||!['todo','doing','done'].includes(t.status)||!Number.isFinite(t.amount)||t.amount<0||t.amount>1e12)throw Error('รายการลงมือทำไม่ถูกต้อง');

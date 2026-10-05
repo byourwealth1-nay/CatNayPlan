@@ -1,5 +1,5 @@
-import {installPlanner} from './planner-ui.mjs?v=2.6';
-import './app.mjs?v=2.6';
+import {installPlanner} from './planner-ui.mjs?v=2.6-flow1';
+import './app.mjs?v=2.6-flow1';
 import {connectFirebase} from './firebase/service.mjs';
 import {SyncEngine,meaningful,validatePlan} from './firebase/sync.mjs';
 installPlanner(window.catnayPlan);

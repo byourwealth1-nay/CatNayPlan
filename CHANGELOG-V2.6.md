@@ -50,3 +50,13 @@ python3 -m http.server 8000 --directory dist
 ```
 
 Then open `http://localhost:8000`. In another terminal, run the four browser scripts above. This workspace used a temporary Chromium package for local verification because the standard Playwright browser download was unavailable; it is not a production dependency.
+
+## Guided flow revision — 5 October 2026
+
+- Replaced the competing 10-step/6-section navigation with five basic stages: profile, income, outgoings, holdings, overview. Detailed editing remains in settings.
+- Brought debt payments and existing insurance premiums into outgoings; existing investments, PVD and saving goals are entered under holdings using the same plan records.
+- Optional retirement, protection, goals and tax planning start from the overview; scenarios are available only in a collapsed overview panel.
+- Added persistent deferred-stage markers and direct overview links back to the relevant stage. Unknown amounts remain unknown.
+- Collapsed secondary document fields, removed duplicate focus selection and the distracting live summary, and labelled annual-average cash flow explicitly.
+- Fixed expanded-entry state restoration using stable record identity instead of element position.
+- Added browser coverage for the complete new journey, deferral/reload/editing, optional planning and mobile/desktop layouts.

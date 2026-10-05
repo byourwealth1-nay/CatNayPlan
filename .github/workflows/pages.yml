@@ -44,6 +44,7 @@ jobs:
           node tests/v24-browser.cjs
           node tests/v25-browser.cjs
           node tests/v26-browser.cjs
+          node tests/friendly-flow.cjs
       - name: Save screenshots
         if: always()
         uses: actions/upload-artifact@v4
