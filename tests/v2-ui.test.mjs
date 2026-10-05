@@ -74,3 +74,8 @@ assert.equal(vm.runInContext('cashflow(state).months[11].income',context),50000)
 assert.equal(vm.runInContext('state.incomes.reduce((v,r)=>v+r.gross,0)',context),700000);
 assert.equal(vm.runInContext('decodePlan(pack(state)).incomes[1].amount',context),90000);
 console.log('PASS bonus: separate annual cash receipt, month selection, explicit taxable gross and backup roundtrip');
+clickAction({action:'demo'});chooseField('incomes.0.taxSource','manual');
+for(const [path,value]of [['incomes.0.gross','1200000'],['incomes.0.withheld','90000']])for(const fn of listeners['doc:input'])fn({target:{dataset:{bind:path,money:'true'},tagName:'INPUT',type:'text',value,max:''}});
+assert.equal(vm.runInContext('state.incomes[0].gross',context),1200000);assert.equal(vm.runInContext('state.incomes[0].withheld',context),90000);
+for(const fn of listeners['doc:input'])fn({target:{dataset:{bind:'incomes.0.certificateIncludesBonus'},tagName:'INPUT',type:'checkbox',checked:true,value:'',max:''}});
+assert.equal(vm.runInContext('taxResult(state).gross',context),1200000);
