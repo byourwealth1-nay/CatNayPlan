@@ -1,6 +1,8 @@
-import './app.mjs?v=2.5';
+import {installPlanner} from './planner-ui.mjs?v=2.6';
+import './app.mjs?v=2.6';
 import {connectFirebase} from './firebase/service.mjs';
 import {SyncEngine,meaningful,validatePlan} from './firebase/sync.mjs';
+installPlanner(window.catnayPlan);
 const bridge=window.catnayPlan, root=document.querySelector('#cloud-panel');
 const labels={local:'บันทึกในอุปกรณ์',ready:'เลือกลูกค้าและแผน หรือบันทึกแผนนี้ขึ้น Cloud',syncing:'☁ กำลังซิงก์...',pending:'☁ รอซิงก์...',synced:'☁ ซิงก์แล้ว',offline:'○ ออฟไลน์ — บันทึกข้อมูลไว้ในอุปกรณ์แล้ว',error:'⚠ ซิงก์ไม่สำเร็จ ข้อมูลในเครื่องยังอยู่ กดลองซิงก์อีกครั้ง',conflict:'พบข้อมูลในอุปกรณ์นี้และ Cloud ที่ต่างกัน',corrupt:'ข้อมูลสำเนาในเครื่องเสียหาย ระงับซิงก์เพื่อป้องกันการเขียนทับ',invalid:'ข้อมูลไม่ถูกต้อง จึงยังไม่ส่งขึ้น Cloud',blank:'แผนว่าง จึงยังไม่ส่งขึ้น Cloud',missing:'ไม่พบแผนบน Cloud ระงับการเขียนทับ', 'local-error':'บันทึกในอุปกรณ์ไม่สำเร็จ จึงระงับ Cloud Sync','other-tab':'พบการแก้ไขจากอีกแท็บ หยุดซิงก์ในแท็บนี้ กรุณาใช้งานทีละแท็บและรีเฟรช'};
 let api=null, engine=null, user=null, generation=0, working=false;

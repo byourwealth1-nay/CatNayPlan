@@ -2,7 +2,7 @@ const {chromium}=require('playwright');
 const assert=require('node:assert/strict');
 (async()=>{const browser=await chromium.launch({headless:true,args:['--no-sandbox']});try{
  const context=await browser.newContext({acceptDownloads:true}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('http://localhost:8000');await page.locator('.settings > summary').click();
+ await page.addInitScript(()=>localStorage.setItem('catnay.interface','all'));await page.goto('http://localhost:8000');await page.locator('.settings > summary').click();
  await page.getByText('Cloud Sync ยังไม่ได้ตั้งค่า ข้อมูลของคุณยังคงบันทึกในอุปกรณ์นี้ตามปกติ').waitFor();assert.equal(await page.locator('#cloud-login').isDisabled(),true);
  await page.locator('.settings > summary').click();await page.locator('[data-bind="profile.name"]').fill('Backup test');
  await page.locator('.settings > summary').click();const downloadPromise=page.waitForEvent('download');await page.locator('.settings [data-action="export"]').click();const download=await downloadPromise;const path=await download.path();assert.ok(path);
@@ -19,7 +19,7 @@ const assert=require('node:assert/strict');
  async createPlan(cid,title,data){cloud={data:structuredClone(data),planName:title,revision:1,updatedAt:100,createdAt:100};return 'plan';},
  async loadPlan(){return structuredClone(cloud);},async savePlan(cid,pid,r){if(r.revision!==cloud.revision)throw Object.assign(Error('conflict'),{code:'conflict'});cloud={...r,revision:r.revision+1,updatedAt:cloud.updatedAt+10};window.__cloudWrites++;return cloud.revision;}
  };}`}));
- await signedPage.goto('http://localhost:8000');await signedPage.locator('[data-bind="profile.name"]').fill('Local migration');await signedPage.locator('.settings > summary').click();await signedPage.locator('#cloud-login').click();
+ await signedPage.addInitScript(()=>localStorage.setItem('catnay.interface','all'));await signedPage.goto('http://localhost:8000');await signedPage.locator('[data-bind="profile.name"]').fill('Local migration');await signedPage.locator('.settings > summary').click();await signedPage.locator('#cloud-login').click();
  await signedPage.locator('#cloud-clients option[value="client"]').waitFor({state:'attached'});await signedPage.locator('#cloud-clients').selectOption('client');
  assert.equal(await signedPage.evaluate(()=>window.__cloudWrites),0);
  await signedPage.locator('#cloud-controls details summary').click();await signedPage.locator('#cloud-plan-name').fill('Test plan');signedPage.once('dialog',d=>d.accept());await signedPage.locator('#cloud-upload').click();

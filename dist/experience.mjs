@@ -1,4 +1,4 @@
-import {incomeTax,spouseEligible} from './model.mjs?v=2.5';
+import {incomeTax,spouseEligible} from './model.mjs?v=2.6';
 // V2.3 interaction helpers. Financial and tax formulas remain in model.mjs.
 export const STORAGE_KEY='fp.plan.v2.3';
 export function parseAmount(raw){
@@ -11,7 +11,7 @@ export const formatAmount=n=>n==null?'':new Intl.NumberFormat('en-US',{minimumFr
 export function fieldKey(s,path){const [kind,i,...rest]=path.split('.');return Array.isArray(s[kind])?`${kind}.${s[kind][i]?.id}.${rest.join('.')}`:path}
 export function meta(s,imported=false){if(!s.ux)s.ux={answers:{},known:{},unknown:{},visited:{},skipped:{},reviewed:{},imported};return s.ux}
 export function normalizeMeta(s){const u=s.ux;if(!u)return meta(s,true);if(typeof u!=='object'||Array.isArray(u)||typeof u.imported!=='boolean')throw Error('ข้อมูลสถานะไม่ถูกต้อง');for(const k of ['answers','known','unknown','visited','skipped','reviewed']){if(!u[k]||typeof u[k]!=='object'||Array.isArray(u[k]))throw Error('ข้อมูลสถานะไม่ครบ');for(const [key,v]of Object.entries(u[k])){if(key.length>200||['__proto__','constructor','prototype'].includes(key))throw Error('สถานะไม่ถูกต้อง');if(k==='answers'?!['yes','no',''].includes(v):typeof v!=='boolean')throw Error('สถานะไม่ถูกต้อง')}}return u}
-export function pack(s){return {app:'FP',version:7,appVersion:'2.5.0',savedAt:new Date().toISOString(),data:s}}
+export function pack(s){return {app:'FP',version:7,appVersion:'2.6.0',savedAt:new Date().toISOString(),data:s}}
 export function storageController(storage,decode){let blocked=false;return {
  load(){try{const raw=storage.getItem(STORAGE_KEY);if(!raw)return {state:null};const payload=JSON.parse(raw);const state=decode(payload);if(payload.version>=6&&!state.ux)throw Error("ข้อมูลสถานะ V2.3 ไม่ครบ");normalizeMeta(state);return {state}}catch(error){blocked=true;return {error,blocked:true}}},
  save(s){if(blocked)return {ok:false,blocked:true};try{storage.setItem(STORAGE_KEY,JSON.stringify(pack(s)));return {ok:true}}catch(error){return {ok:false,error}}},

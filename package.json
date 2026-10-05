@@ -1,11 +1,11 @@
 {
   "name": "catnayplan",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "test": "node tests.mjs && node --test tests/v24-sync.test.mjs",
+    "test": "node tests.mjs && node --test tests/v26-planner.test.mjs && node --test tests/v24-sync.test.mjs",
     "test:browser": "node tests/browser-check.cjs",
     "test:rules": "firebase emulators:exec --project demo-catnayplan --only firestore \"node --test tests/firestore-rules.test.mjs\"",
     "deploy:rules": "firebase deploy --only firestore:rules"
