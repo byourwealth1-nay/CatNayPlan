@@ -1,7 +1,7 @@
 import {decodePlan} from '../model.mjs';
 import {normalizeMeta,meta} from '../experience.mjs';
 export function validatePlan(data) {
-  const copy=structuredClone(data); const result=decodePlan({app:'FP',version:6,data:copy});
+  const copy=structuredClone(data); const result=decodePlan({app:'FP',version:copy.version||6,data:copy});
   if(!result.ux)throw Error('invalid-plan');normalizeMeta(result);return result;
 }
 export function meaningful(data) {

@@ -1,3 +1,7 @@
+# V2.5 migration note
+
+V2.5 writes schema 7 and reads/migrates older plan data. Deploy firestore.rules from V2.5 before enabling Cloud. This repository still has firebaseConfig = null: Google OAuth and cross-device production sync are not configured or verified. Existing instructions below describe the setup process.
+
 # CatNayPlan V2.4.0 — Cloud Sync Setup
 
 ## Architecture and data integrity

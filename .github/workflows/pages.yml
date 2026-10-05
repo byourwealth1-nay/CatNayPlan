@@ -42,6 +42,7 @@ jobs:
           curl --fail --silent http://localhost:8000/ > /dev/null
           npm run test:browser
           node tests/v24-browser.cjs
+          node tests/v25-browser.cjs
       - name: Save screenshots
         if: always()
         uses: actions/upload-artifact@v4

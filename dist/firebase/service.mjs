@@ -45,7 +45,7 @@ export async function connectFirebase(config = firebaseConfig) {
         const parent=await tx.get(clientRef(cid));if(!parent.exists()||parent.data().archived)throw Error('archived-client');
         const snap=await tx.get(ref), current=map(snap);
         if((current?.revision||0)!==input.revision || (current?.updatedAt||0)!==input.updatedAt)throw Object.assign(Error('conflict'),{code:'conflict'});
-        const next={planName:title,data,schemaVersion:6,revision:input.revision+1,createdAt:current?snap.data().createdAt:serverTimestamp(),updatedAt:serverTimestamp()};
+        const next={planName:title,data,schemaVersion:7,revision:input.revision+1,createdAt:current?snap.data().createdAt:serverTimestamp(),updatedAt:serverTimestamp()};
         tx.set(ref,next);return next.revision;
       });
     }

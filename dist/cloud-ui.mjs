@@ -1,4 +1,4 @@
-import './app.mjs?v=2.4';
+import './app.mjs?v=2.5';
 import {connectFirebase} from './firebase/service.mjs';
 import {SyncEngine,meaningful,validatePlan} from './firebase/sync.mjs';
 const bridge=window.catnayPlan, root=document.querySelector('#cloud-panel');
@@ -12,7 +12,7 @@ async function cachedList(key,read){try{const rows=await read();localStorage.set
 async function clients(){const g=generation;const rows=await cachedList('catnay.clients.'+user.uid,()=>api.getClients());if(g!==generation)return;options('cloud-clients',rows.filter(x=>!x.archived),'name');}
 async function plans(){const cid=el('cloud-clients').value,g=generation;options('cloud-plans',[],'planName');if(!cid)return;const rows=await cachedList('catnay.plans.'+user.uid+'.'+cid,()=>api.getPlans(cid));if(g===generation&&cid===el('cloud-clients').value)options('cloud-plans',rows,'planName');}
 async function action(fn){if(working)return;working=true;try{await fn();}catch(error){const code=error?.code||'';status(code==='auth/popup-closed-by-user'||code==='auth/cancelled-popup-request'?'ยกเลิกการเข้าสู่ระบบแล้ว':code==='auth/popup-blocked'?'เบราว์เซอร์ปิดกั้นหน้าต่างเข้าสู่ระบบ กรุณาอนุญาต pop-up แล้วลองอีกครั้ง':code==='auth/unauthorized-domain'?'โดเมนนี้ยังไม่ได้รับอนุญาตใน Firebase Authentication':code.startsWith('auth/')?'เข้าสู่ระบบไม่สำเร็จ กรุณาลองอีกครั้ง':labels.error);}finally{working=false;}}
-function preserve(){bridge.flush();if(bridge.blocked())throw Error('local-blocked');const data=bridge.get();if(meaningful(data))localStorage.setItem('catnay.recovery.'+Date.now(),JSON.stringify({data,app:'FP',version:6}));}
+function preserve(){bridge.flush();if(bridge.blocked())throw Error('local-blocked');const data=bridge.get();if(meaningful(data))localStorage.setItem('catnay.recovery.'+Date.now(),JSON.stringify({data,app:'FP',version:7}));}
 function requireClient(){const cid=el('cloud-clients').value;if(!cid)throw Error('select-client');return cid;}
 el('cloud-login').onclick=()=>action(()=>api.login());
 el('cloud-logout').onclick=()=>action(async()=>{bridge.flush();await api.logout();});

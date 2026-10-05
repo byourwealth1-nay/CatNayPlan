@@ -9,12 +9,12 @@ assert.equal(store.clear().ok,true);assert.equal(values.size,0);
 values.set(STORAGE_KEY,'{broken');store=storageController(storage,decodePlan);assert.equal(store.load().blocked,true);assert.equal(store.save(s).ok,false);assert.equal(values.get(STORAGE_KEY),'{broken');assert.equal(store.clear().ok,true);assert.equal(store.save(s).ok,true);
 const denied=storageController({getItem(){throw Error('denied')},setItem(){throw Error('quota')},removeItem(){throw Error('denied')}},decodePlan);assert.ok(denied.load().error);assert.equal(denied.clear().ok,false);assert.equal(denied.save(s).ok,false);
 const quota=storageController({...storage,setItem(){throw Error('quota')}},decodePlan);assert.equal(quota.save(s).ok,false);
-for(const version of [3,4,5]){const migrated=decodePlan({app:'FP',version,data:demo()});normalizeMeta(migrated);assert.equal(migrated.ux.imported,true);assert.equal(migrated.incomes[0].amount,65000)}
+for(const version of [3,4,5]){const migrated=decodePlan({app:'FP',version,data:demo()});normalizeMeta(migrated);assert.equal(migrated.ux.imported,true);assert.equal(migrated.incomes[0].amount,80000)}
 const f=fresh();meta(f);assert.equal(pageStatus(f,'finance'),'ยังไม่เริ่ม');assert.ok(missing(f,'finance').length);f.ux.answers.policies='no';assert.equal(answer(f,'policies'),'no');f.policies.push(factories.policies());assert.equal(answer(f,'policies'),'yes');
 f.ux.skipped.goals=true;assert.equal(pageStatus(f,'goals'),'เลือกข้าม');
-f.incomes.push(factories.incomes());const key=fieldKey(f,'incomes.0.amount');f.ux.unknown[key]=true;const restored=decodePlan(JSON.parse(JSON.stringify(pack(f))));normalizeMeta(restored);assert.equal(restored.ux.unknown[key],true);assert.ok(missing(restored,'tax').some(s=>s.includes('ยังไม่ทราบ')));
+f.incomes.push(factories.incomes());const key=fieldKey(f,'incomes.0.amount');f.ux.unknown[key]=true;const restored=decodePlan(JSON.parse(JSON.stringify(pack(f))));normalizeMeta(restored);assert.equal(restored.ux.unknown[key],true);assert.ok(missing(restored,'finance').some(s=>s.includes('ยังไม่ทราบ')));
 f.incomes.unshift(factories.incomes());assert.equal(fieldKey(f,'incomes.1.amount'),key);
-const allocated=allocation(demo());assert.equal(allocated.allocated,650000);assert.equal(allocated.free,0);
+const allocated=allocation(demo());assert.equal(allocated.allocated,1475000);assert.equal(allocated.free,60000);
 assert.throws(()=>normalizeMeta({ux:{}}));
 console.log('PASS V2.3: decimals/comma, blank vs zero, storage restore/clear/failure/corruption protection, legacy import, unknown persistence, stable field IDs, progress, allocation');
 

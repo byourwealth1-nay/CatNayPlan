@@ -21,8 +21,8 @@ service cloud.firestore {
           function validPlan() {
             let p = request.resource.data;
             return p.keys().hasOnly(['planName','data','schemaVersion','revision','createdAt','updatedAt'])
-              && title(p.planName) && p.schemaVersion == 6 && p.revision is int
-              && p.data is map && p.data.version == 6 && p.data.profile is map
+              && title(p.planName) && p.schemaVersion == 7 && p.revision is int
+              && p.data is map && p.data.version == 7 && p.data.profile is map
               && p.data.tax is map && p.data.tax.year == 2569 && p.data.ux is map
               && p.data.incomes is list && p.data.expenses is list && p.data.assets is list
               && p.data.debts is list && p.data.policies is list && p.data.portfolios is list && p.data.goals is list
