@@ -59,3 +59,18 @@ console.log('PASS V2.3 UI events: comma focus/blur, blank vs zero, real numeric 
 for(const p of ['profile.age','profile.dependents','tax.extraChildren','retirement.inflation','goals.0.years','policies.0.copay'])assert.equal(vm.runInContext(`isMoney('${p}')`,context),false);
 vm.runInContext("state=fresh();meta(state);for(const p of ['finance','protection','goals','retirement','tax'])meta(state).skipped[p]=true",context);location.hash='#report';listeners['win:hashchange'].forEach(f=>f());assert.match(els.get('report-results').innerHTML,/เลือกข้าม — ไม่แสดงยอดคำนวณ/);assert.doesNotMatch(els.get('report-results').innerHTML,/class="stats"/);
 console.log('PASS V2.3 non-money fields and skipped report has no fabricated zero totals');
+
+// Bonus is a separate annual income: cash arrives once, tax amounts are explicit.
+clickAction({action:'new'});location.hash='#finance';listeners['win:hashchange'].forEach(f=>f());clickAction({add:'incomes'});
+typeField('incomes.0.amount','50000');typeField('incomes.0.gross','600000');
+assert.match(els.get('content').innerHTML,/data-add="bonus"/);
+clickAction({add:'bonus',salary:'0'});
+assert.equal(vm.runInContext('state.incomes[1].frequency',context),'yearly');
+assert.equal(vm.runInContext('state.incomes[1].taxType',context),'1');
+typeField('incomes.1.amount','90000');typeField('incomes.1.gross','100000');typeField('incomes.1.withheld','10000');chooseField('incomes.1.month','3');
+assert.equal(vm.runInContext('cashflow(state).income',context),690000);
+assert.equal(vm.runInContext('cashflow(state).months[2].income',context),140000);
+assert.equal(vm.runInContext('cashflow(state).months[11].income',context),50000);
+assert.equal(vm.runInContext('state.incomes.reduce((v,r)=>v+r.gross,0)',context),700000);
+assert.equal(vm.runInContext('decodePlan(pack(state)).incomes[1].amount',context),90000);
+console.log('PASS bonus: separate annual cash receipt, month selection, explicit taxable gross and backup roundtrip');

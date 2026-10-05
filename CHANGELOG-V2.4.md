@@ -9,3 +9,8 @@
 - User-owned Firestore paths and restrictive Rules; emulator tests deny anonymous/cross-user access and invalid writes.
 - Existing calculation tests plus 13 sync-controller tests and Rules Emulator test pass locally. Local Chromium binary is unavailable; GitHub Actions runs existing UI checks and added Settings/backup checks before deployment.
 - Firebase production OAuth and cross-device sync require the user's Firebase project configuration and are not yet verified. Read CLOUD-SYNC.md.
+
+## Bonus income
+- Added “เพิ่มโบนัส” to monthly salary entries. Bonus uses a separate annual income with its own receipt month, net/gross cash amount and annual taxable gross/withholding.
+- Clarified that salary annual tax totals exclude any bonus entered separately; existing saved plans are preserved.
+- Added UI calculation/backup and browser persistence coverage.
