@@ -1,4 +1,4 @@
-import {incomeTax,spouseEligible} from './model.mjs?v=2.6-retire1';
+import {incomeTax,spouseEligible} from './model.mjs?v=2.6-taxflow1';
 // V2.3 interaction helpers. Financial and tax formulas remain in model.mjs.
 export const STORAGE_KEY='fp.plan.v2.3';
 export function parseAmount(raw){

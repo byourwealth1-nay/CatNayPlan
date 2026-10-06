@@ -6,3 +6,5 @@ import './tests/v22-tax-audit.test.mjs';
 import './tests/v23-experience.test.mjs';
 
 import './tests/v25-model.test.mjs';
+
+import './tests/tax-planning.test.mjs';

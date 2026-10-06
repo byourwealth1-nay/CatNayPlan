@@ -1,5 +1,5 @@
-import {installPlanner} from './planner-ui.mjs?v=2.6-retire1';
-import './app.mjs?v=2.6-retire1';
+import {installPlanner} from './planner-ui.mjs?v=2.6-taxflow1';
+import './app.mjs?v=2.6-taxflow1';
 import {connectFirebase} from './firebase/service.mjs';
 import {SyncEngine,meaningful,validatePlan} from './firebase/sync.mjs';
 installPlanner(window.catnayPlan);
