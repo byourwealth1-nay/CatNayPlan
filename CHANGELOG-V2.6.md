@@ -68,3 +68,12 @@ Then open `http://localhost:8000`. In another terminal, run the four browser scr
 - The overview leads with average cash remaining, emergency reserve coverage and monthly debt payments. Net assets remain available in the detail disclosure.
 - Missing information suppresses final totals and supplies field-specific links plus an explanation of the result it enables. Complete plans show up to three prioritized actions before secondary navigation.
 - Added model and browser checks for presets, unknown amounts, exact-field completion, return navigation, reloads, duplicates and responsive layouts.
+
+## Retirement annual ledger — 6 October 2026
+
+- Retirement results now start with projected opening capital, a source breakdown, and annual opening balance, income, expenses, return, closing balance and unfunded expense. Mobile uses expandable year cards.
+- Income details separate social security, each annuity and other income, with annual amounts and monthly equivalents (not a monthly payment simulation).
+- Annual net spending occurs at the start of the year; the remaining funds earn the assumed annual return. Surplus income now remains invested. The required starting capital is recalculated backwards using this same convention and the terminal legacy goal.
+- Shortfalls are tracked separately, never as negative investable balances or an assumed loan. The first shortfall year and terminal balance are shown.
+- Future unrecorded lump sums and funds unavailable at retirement remain excluded, explicitly stated in the ledger. No assumed sale proceeds or payout dates are added.
+- Tests reconcile the ledger, target funding, pension end dates, surplus reinvestment, depletion, desktop/mobile layouts and unknown-data suppression.

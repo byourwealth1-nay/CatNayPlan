@@ -1,4 +1,4 @@
-import {validatePlanning} from './planner.mjs?v=2.6-flow2';
+import {validatePlanning} from './planner.mjs?v=2.6-retire1';
 export const VERSION=7;
 export const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 export const CHECKED='2026-10-03';
@@ -77,7 +77,30 @@ export function cashflow(s){
  return{premiums,income,expenses,debtMonthly,portfolioCash,goalMonthly,savingMonthly,essential,reserves,assetTotal,debtTotal,socialOwn,payrollDeductions,net:assetTotal-debtTotal,free:income/12-expenses/12-debtMonthly-premiums/12,remaining:income/12-expenses/12-debtMonthly-premiums/12-savingMonthly,reserveTarget:essential*n(s.profile.reserveMonths),runway:essential?reserves/essential:0,months};
 }
 export function goalResults(s){return s.goals.map(g=>{const years=n(g.years),a=allocated(s,g.id,years),target=n(g.target)*(g.todayValue?Math.pow(1+s.retirement.inflation/100,years):1),monthly=a.monthly+n(g.monthly);return{...g,...a,targetValue:target,monthlyTotal:monthly,required:saving(target,a.capital,g.rate,years),future:future(a.capital,g.rate,years,monthly),term:years<=3?'ระยะสั้น':years<=7?'ระยะกลาง':'ระยะยาว',invalid:years<=0}})}
-export function retirementResult(s){const r=s.retirement,years=r.age-s.profile.age,duration=r.end-r.age;if(years<0||duration<=0)return{invalid:true};const a=allocated(s,'retirement',years),base=n(r.expense)*12*Math.pow(1+r.inflation/100,years),policies=s.policies.filter(p=>p.type==='annuity'&&p.insured==='self'&&active(p,s));let target=0;const timeline=[];for(let i=0;i<duration;i++){const age=r.age+i,expense=base*Math.pow(1+r.inflation/100,i),pension=(age>=r.socialAge?n(r.social)*12:0)+(age>=r.otherAge?n(r.other)*12:0)+sum(policies.filter(p=>age>=p.annuityStart&&age<=p.annuityEnd),p=>n(p.annuity));const need=Math.max(0,expense-pension);target+=need/Math.pow(1+r.postRate/100,i);timeline.push({age,expense,pension,need})}target+=n(r.legacy)/Math.pow(1+r.postRate/100,duration);const fv=future(a.capital,r.rate,years,a.monthly+n(r.monthly));return{...a,invalid:false,years,duration,target,future:fv,gap:Math.max(0,target-fv),required:saving(target,a.capital,r.rate,years),extraNeeded:Math.max(0,saving(target,a.capital,r.rate,years)-a.monthly),monthly:a.monthly+n(r.monthly),firstExpense:base/12,annuities:policies,timeline}}
+export function retirementResult(s){
+ const r=s.retirement,years=r.age-s.profile.age,duration=r.end-r.age;
+ if(years<0||duration<=0)return{invalid:true};
+ const a=allocated(s,'retirement',years),base=n(r.expense)*12*Math.pow(1+r.inflation/100,years),policies=s.policies.filter(p=>p.type==='annuity'&&p.insured==='self'&&active(p,s));
+ const sources=[...s.assets.filter(p=>p.kind==='cash'&&p.purpose==='retirement').map(p=>({name:p.name,type:'เงินสด / เงินฝาก',capital:n(p.value),monthly:0})),...s.portfolios.filter(p=>p.purpose==='retirement'&&unlockYears(p,s)<=years).map(p=>({name:p.name,type:p.type,capital:n(p.value),monthly:n(p.monthly)+n(p.employer)}))];
+ if(n(r.monthly)>0)sources.push({name:'เงินออมเกษียณเพิ่มนอกพอร์ต',type:'เงินออมเพิ่ม',capital:0,monthly:n(r.monthly)});
+ for(const source of sources)source.projected=future(source.capital,r.rate,years,source.monthly);
+ const fv=future(a.capital,r.rate,years,a.monthly+n(r.monthly)),timeline=[];
+ let balance=fv,totalShortfall=0;
+ for(let i=0;i<duration;i++){
+  const age=r.age+i,expense=base*Math.pow(1+r.inflation/100,i),social=age>=r.socialAge?n(r.social)*12:0,other=age>=r.otherAge?n(r.other)*12:0;
+  const annuityItems=policies.filter(p=>age>=p.annuityStart&&age<=p.annuityEnd).map(p=>({name:p.name,amount:n(p.annuity)}));
+  const annuity=sum(annuityItems,p=>p.amount),pension=social+other+annuity,opening=balance,available=opening+pension;
+  const shortfall=Math.max(0,expense-available),afterSpending=Math.max(0,available-expense),growth=afterSpending*r.postRate/100;
+  balance=afterSpending+growth;totalShortfall+=shortfall;
+  timeline.push({age,expense,pension,need:Math.max(0,expense-pension),social,other,annuity,annuityItems,opening,growth,closing:balance,shortfall});
+ }
+ // Match the forward ledger: net annual spending at the start of each year,
+ // then growth. Surplus income remains invested; no borrowing covers shortfalls.
+ let target=n(r.legacy);
+ for(let i=timeline.length-1;i>=0;i--)target=Math.max(0,target/(1+r.postRate/100)+timeline[i].expense-timeline[i].pension);
+ const firstShortfall=timeline.find(t=>t.shortfall>0.01)?.age??null;
+ return{...a,invalid:false,years,duration,target,future:fv,gap:Math.max(0,target-fv),required:saving(target,a.capital,r.rate,years),extraNeeded:Math.max(0,saving(target,a.capital,r.rate,years)-a.monthly),monthly:a.monthly+n(r.monthly),firstExpense:base/12,annuities:policies,timeline,sources,firstShortfall,totalShortfall,endingBalance:balance,legacyGap:Math.max(0,n(r.legacy)-balance)};
+}
 export function protectionResult(s){const policies=s.policies.filter(p=>active(p,s)&&p.insured==='self'),cf=cashflow(s);const need=Math.max(0,n(s.protection.familyMonthly)*12*n(s.protection.years)+cf.debtTotal+n(s.protection.education)-n(s.protection.available)),cover=sum(policies,p=>n(p.death))+n(s.protection.welfareLife);const ciNeed=n(s.protection.familyMonthly)*12*n(s.protection.ciYears),disabilityNeed=n(s.protection.incomeMonthly)*n(s.protection.disabilityMonths);return{need,cover,ciNeed,disabilityNeed,disability:sum(policies,p=>n(p.disability)),gap:Math.max(0,need-cover),healthCount:policies.filter(p=>p.health>0).length,ci:sum(policies,p=>n(p.ci)),expired:s.policies.filter(p=>p.end&&p.end<s.profile.asOf).length}}
 export function progressiveTax(net){let left=Math.max(0,net),tax=0,previous=0;for(const[cap,rate]of[[150000,0],[300000,.05],[500000,.1],[750000,.15],[1000000,.2],[2000000,.25],[5000000,.3],[Infinity,.35]]){const portion=Math.min(left,cap-previous);tax+=Math.max(0,portion)*rate;left-=portion;previous=cap;if(left<=0)break}return tax}
 // Exemptions precede expense allowances; reduce each income row at most once.

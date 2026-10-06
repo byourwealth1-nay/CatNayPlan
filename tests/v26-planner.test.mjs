@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {demo,fresh,decodePlan,cashflow} from '../dist/model.mjs';
+import {demo,fresh,decodePlan,cashflow,retirementResult} from '../dist/model.mjs';
 import {planning,health,suggestions,snapshot,experiment,taskFromSuggestion} from '../dist/planner.mjs';
 import {pack} from '../dist/experience.mjs';
 test('scenario conserves cash, does not mutate source and roundtrips accepted values',()=>{
@@ -29,4 +29,16 @@ test('quick entry keeps amounts unknown even for imported plans, avoids duplicat
  assert.equal(item.existing,false);assert.ok(basicIssues(s).some(x=>x.title.includes('ค่านายหน้า')));assert.equal(cashflow(s).income,before.income);
  const count=s.incomes.length;assert.equal(addPreset(s,'commission').existing,true);assert.equal(s.incomes.length,count);assert.doesNotThrow(()=>decodePlan(pack(s)));
  const debt=addPreset(s,'home');assert.equal(s.debts.find(x=>x.id===debt.id).method,'manual');assert.ok(basicIssues(s).some(x=>x.title.includes('สินเชื่อบ้าน')));
+});
+
+test('retirement ledger rolls balances, splits pensions and reports shortfall without negative assets',()=>{
+ const s=fresh();s.profile.age=60;Object.assign(s.retirement,{age:60,end:62,expense:50000,inflation:2.5,rate:0,postRate:3,social:8000,socialAge:60,other:0,monthly:0});s.assets=[{id:'cash',name:'เงินตั้งต้น',kind:'cash',purpose:'retirement',value:10000000}];
+ let r=retirementResult(s);assert.equal(r.timeline[0].opening,10000000);assert.equal(r.timeline[0].closing,9780880);assert.ok(Math.abs(r.timeline[1].closing-9539736.4)<.001);assert.equal(r.firstShortfall,null);assert.equal(r.timeline[0].social,96000);assert.equal(r.sources.reduce((a,x)=>a+x.projected,0),r.future);
+ s.assets[0].value=100000;r=retirementResult(s);assert.equal(r.firstShortfall,60);assert.equal(r.timeline[0].shortfall,404000);assert.equal(r.timeline[0].growth,0);assert.equal(r.timeline[0].closing,0);
+ for(const t of r.timeline)assert.ok(Math.abs(t.opening+t.pension-t.expense+t.shortfall+t.growth-t.closing)<.001);
+});
+test('surplus income is retained; backward target funds every year and terminal legacy',()=>{
+ const s=fresh();s.profile.age=60;Object.assign(s.retirement,{age:60,end:63,expense:10000,inflation:0,rate:0,postRate:3,social:0,other:0,monthly:0,legacy:50000});s.policies=[{id:'ann',name:'บำนาญ',type:'annuity',insured:'self',status:'active',start:'',end:'',annuity:240000,annuityStart:60,annuityEnd:60}];
+ const result=retirementResult(s);s.assets=[{id:'c',name:'เงินเกษียณ',kind:'cash',purpose:'retirement',value:result.target}];const funded=retirementResult(s);
+ assert.equal(funded.firstShortfall,null);assert.ok(Math.abs(funded.endingBalance-50000)<.001);assert.equal(funded.timeline[0].annuity,240000);assert.equal(funded.timeline[1].annuity,0);assert.ok(funded.timeline[0].closing>funded.timeline[0].opening);
 });

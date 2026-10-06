@@ -1,5 +1,5 @@
-import {factories} from './model.mjs?v=2.6-flow2';
-import {meta,fieldKey,answer,unknownFor} from './experience.mjs?v=2.6-flow2';
+import {factories} from './model.mjs?v=2.6-retire1';
+import {meta,fieldKey,answer,unknownFor} from './experience.mjs?v=2.6-retire1';
 export const presets={
  salary:{kind:'incomes',label:'เงินเดือน',values:{name:'เงินเดือน',frequency:'monthly',amountMode:'net',taxType:'1',taxSource:'manual'}},
  commission:{kind:'incomes',label:'ค่านายหน้า',values:{name:'ค่านายหน้า',frequency:'monthly',amountMode:'net',taxType:'2',taxSource:'manual'}},
