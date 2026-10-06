@@ -1,5 +1,5 @@
-import{VERSION,CHECKED,uid,n,sum,money,incomeTypes,lifeTypes,nonlifeTypes,portfolioTypes,factories,fresh,demo,annual,premiumAnnual,active,cashflow,goalResults,retirementResult,protectionResult,taxResult,warnings,decodePlan,incomeBreakdown,portfolioTax,socialAnnual,incomeTax,incomeMonths,bonusParent,spouseEligible,esgxCarry,debtSchedule,retirementScenarios}from'./model.mjs?v=2.6-flow1';
-import {parseAmount,formatAmount,fieldKey,meta,normalizeMeta,pack,storageController,answer,existing,missing,pageStatus,allocation,unknownFor} from './experience.mjs?v=2.6-flow1';
+import{VERSION,CHECKED,uid,n,sum,money,incomeTypes,lifeTypes,nonlifeTypes,portfolioTypes,factories,fresh,demo,annual,premiumAnnual,active,cashflow,goalResults,retirementResult,protectionResult,taxResult,warnings,decodePlan,incomeBreakdown,portfolioTax,socialAnnual,incomeTax,incomeMonths,bonusParent,spouseEligible,esgxCarry,debtSchedule,retirementScenarios}from'./model.mjs?v=2.6-flow2';
+import {parseAmount,formatAmount,fieldKey,meta,normalizeMeta,pack,storageController,answer,existing,missing,pageStatus,allocation,unknownFor} from './experience.mjs?v=2.6-flow2';
 let sandboxOriginal=null,planRevision=0;
 let state=fresh(),page='finance',taxTab='all',dirty=false,undoState=null;
 

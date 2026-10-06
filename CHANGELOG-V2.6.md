@@ -60,3 +60,11 @@ Then open `http://localhost:8000`. In another terminal, run the four browser scr
 - Collapsed secondary document fields, removed duplicate focus selection and the distracting live summary, and labelled annual-average cash flow explicitly.
 - Fixed expanded-entry state restoration using stable record identity instead of element position.
 - Added browser coverage for the complete new journey, deferral/reload/editing, optional planning and mobile/desktop layouts.
+
+## Navigation, quick entry and overview — 6 October 2026
+
+- Tax, retirement, family protection and goals have visible shortcuts on every basic stage. A return control restores the originating stage and field across topic changes and reloads.
+- Quick-entry choices cover salary, commissions, food, utilities, transport, home loans, car loans and credit cards. Monetary amounts remain unknown until supplied; matching names open the existing record instead of adding duplicates.
+- The overview leads with average cash remaining, emergency reserve coverage and monthly debt payments. Net assets remain available in the detail disclosure.
+- Missing information suppresses final totals and supplies field-specific links plus an explanation of the result it enables. Complete plans show up to three prioritized actions before secondary navigation.
+- Added model and browser checks for presets, unknown amounts, exact-field completion, return navigation, reloads, duplicates and responsive layouts.

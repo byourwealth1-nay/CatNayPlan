@@ -22,3 +22,11 @@ test('unresolved cash value blocks diagnoses and historical observations',()=>{
 test('saving ratio counts employee payroll once, excludes employer contribution',()=>{
  const s=demo(),h=health(s);assert.equal(h.saving,cashflow(s).savingMonthly+4000);s.portfolios[0].employer=9000;assert.equal(health(s).saving,h.saving);
 });
+
+test('quick entry keeps amounts unknown even for imported plans, avoids duplicates and roundtrips',async()=>{
+ const {addPreset,basicIssues}=await import('../dist/ux-helpers.mjs');
+ const s=demo();const before=cashflow(s);const item=addPreset(s,'commission');
+ assert.equal(item.existing,false);assert.ok(basicIssues(s).some(x=>x.title.includes('ค่านายหน้า')));assert.equal(cashflow(s).income,before.income);
+ const count=s.incomes.length;assert.equal(addPreset(s,'commission').existing,true);assert.equal(s.incomes.length,count);assert.doesNotThrow(()=>decodePlan(pack(s)));
+ const debt=addPreset(s,'home');assert.equal(s.debts.find(x=>x.id===debt.id).method,'manual');assert.ok(basicIssues(s).some(x=>x.title.includes('สินเชื่อบ้าน')));
+});

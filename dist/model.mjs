@@ -1,4 +1,4 @@
-import {validatePlanning} from './planner.mjs?v=2.6-flow1';
+import {validatePlanning} from './planner.mjs?v=2.6-flow2';
 export const VERSION=7;
 export const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 export const CHECKED='2026-10-03';
